@@ -648,74 +648,64 @@
             }
             
             formatMessage(content) {
-                console.log('Original content:', JSON.stringify(content));
-                
-                // Direct approach - convert \\n to <br> first
-                let formatted = content
-                    .replace(/\\n\\n/g, '</p><p>')
-                    .replace(/\\n/g, '<br>');
-                
-                console.log('After line breaks:', formatted);
-                
-                // Handle bullet points - look for bullet/number + space pattern
-                if (formatted.includes('•') || formatted.includes('- ') || formatted.match(/\\d+\\./)) {
-                    // Split by <br> and process each line
-                    const lines = formatted.split('<br>');
-                    let result = '';
-                    let inList = false;
+                try {
+                    // Simple and safe formatting
+                    let formatted = content;
                     
-                    for (let line of lines) {
-                        line = line.trim();
+                    // Convert newlines to breaks
+                    formatted = formatted.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br>');
+                    
+                    // Handle numbered lists (1., 2., 3.)
+                    if (formatted.includes('1.') || formatted.includes('2.') || formatted.includes('3.')) {
+                        const lines = formatted.split('<br>');
+                        let result = '';
+                        let inList = false;
                         
-                        if (line.match(/^[•\\-]\\s/) || line.match(/^\\d+\\.\\s/)) {
-                            // Start list if not already in one
-                            if (!inList) {
-                                result += '<ul>';
-                                inList = true;
-                            }
+                        for (let line of lines) {
+                            line = line.trim();
                             
-                            // Clean the bullet/number and wrap in <li>
-                            const cleanLine = line.replace(/^[•\\-]\\s+/, '').replace(/^\\d+\\.\\s+/, '');
-                            result += `<li>${cleanLine}</li>`;
-                        } else {
-                            // Close list if we were in one
-                            if (inList) {
-                                result += '</ul>';
-                                inList = false;
+                            // Check for numbered items
+                            if (/^\\d+\\.\\s/.test(line)) {
+                                if (!inList) {
+                                    result += '<ul>';
+                                    inList = true;
+                                }
+                                const cleanLine = line.replace(/^\\d+\\.\\s+/, '');
+                                result += '<li>' + cleanLine + '</li>';
+                            } else {
+                                if (inList) {
+                                    result += '</ul>';
+                                    inList = false;
+                                }
+                                if (line) {
+                                    result += '<p>' + line + '</p>';
+                                }
                             }
-                            
-                            // Add as paragraph if not empty
-                            if (line && !line.includes('</p>')) {
-                                result += `<p>${line}</p>`;
-                            } else if (line) {
-                                result += line;
-                            }
+                        }
+                        
+                        if (inList) {
+                            result += '</ul>';
+                        }
+                        
+                        formatted = result;
+                    } else {
+                        // Regular paragraph
+                        if (!formatted.includes('<p>')) {
+                            formatted = '<p>' + formatted + '</p>';
                         }
                     }
                     
-                    // Close final list if needed
-                    if (inList) {
-                        result += '</ul>';
-                    }
+                    // Basic text formatting
+                    formatted = formatted
+                        .replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>')
+                        .replace(/⚡/g, '<span style="color: #f59e0b;">⚡</span>')
+                        .replace(/<p><\\/p>/g, '');
                     
-                    formatted = result;
-                } else {
-                    // No bullets - just wrap in paragraphs
-                    if (!formatted.includes('<p>')) {
-                        formatted = `<p>${formatted}</p>`;
-                    }
+                    return formatted;
+                } catch (error) {
+                    // Fallback - just return original content with basic formatting
+                    return content.replace(/\\n/g, '<br>').replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>');
                 }
-                
-                // Clean up and format text
-                formatted = formatted
-                    .replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>')
-                    .replace(/⚡/g, '<span style="color: #f59e0b; font-weight: bold;">⚡</span>')
-                    .replace(/<p><\\/p>/g, '')
-                    .replace(/<br><\\/p>/g, '</p>')
-                    .replace(/<p><br>/g, '<p>');
-                
-                console.log('Final formatted:', formatted);
-                return formatted;
             }
             
             setLoading(loading) {
