@@ -657,8 +657,8 @@
                 
                 console.log('After line breaks:', formatted);
                 
-                // Handle bullet points - look for bullet + space pattern
-                if (formatted.includes('•') || formatted.includes('- ')) {
+                // Handle bullet points - look for bullet/number + space pattern
+                if (formatted.includes('•') || formatted.includes('- ') || formatted.match(/\\d+\\./)) {
                     // Split by <br> and process each line
                     const lines = formatted.split('<br>');
                     let result = '';
@@ -667,15 +667,15 @@
                     for (let line of lines) {
                         line = line.trim();
                         
-                        if (line.match(/^[•\\-]\\s/)) {
+                        if (line.match(/^[•\\-]\\s/) || line.match(/^\\d+\\.\\s/)) {
                             // Start list if not already in one
                             if (!inList) {
                                 result += '<ul>';
                                 inList = true;
                             }
                             
-                            // Clean the bullet and wrap in <li>
-                            const cleanLine = line.replace(/^[•\\-]\\s+/, '');
+                            // Clean the bullet/number and wrap in <li>
+                            const cleanLine = line.replace(/^[•\\-]\\s+/, '').replace(/^\\d+\\.\\s+/, '');
                             result += `<li>${cleanLine}</li>`;
                         } else {
                             // Close list if we were in one
