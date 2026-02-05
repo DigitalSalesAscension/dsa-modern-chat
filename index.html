@@ -6,7 +6,6 @@
     <title>DSA Ray-I Coach - Digital Sales Ascension</title>
     <style>
         :root {
-            /* Clean, modern palette matching your website */
             --bg-primary: #ffffff;
             --bg-secondary: #f8fafc;
             --bg-card: #ffffff;
@@ -36,7 +35,6 @@
             overflow-x: hidden;
         }
 
-        /* Clean header matching your website style */
         .header {
             background: var(--bg-primary);
             border-bottom: 1px solid var(--border-light);
@@ -84,7 +82,6 @@
             font-weight: 400;
         }
 
-        /* Main container - clean layout */
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -118,7 +115,6 @@
             margin-right: auto;
         }
 
-        /* Quick actions matching your website buttons */
         .quick-actions {
             display: flex;
             gap: 12px;
@@ -164,7 +160,6 @@
             border-color: var(--text-muted);
         }
 
-        /* Chat interface - clean and modern */
         .chat-container {
             background: var(--bg-card);
             border-radius: 16px;
@@ -195,6 +190,7 @@
             justify-content: center;
             color: white;
             font-weight: 600;
+            position: relative;
         }
 
         .chat-header-info h3 {
@@ -257,6 +253,17 @@
             line-height: 1.7;
         }
 
+        .message.assistant .message-bubble {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        .message.user .message-bubble {
+            background: var(--accent-dark);
+            color: white;
+        }
+
         .message-bubble p {
             margin: 0 0 16px 0;
             font-size: 16px;
@@ -295,22 +302,6 @@
             color: var(--text-primary);
         }
 
-        .message-bubble em {
-            font-style: italic;
-            color: var(--text-secondary);
-        }
-
-        .message.assistant .message-bubble {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-light);
-        }
-
-        .message.user .message-bubble {
-            background: var(--accent-dark);
-            color: white;
-        }
-
         .typing-indicator {
             display: none;
             align-items: center;
@@ -341,7 +332,6 @@
             40% { opacity: 1; }
         }
 
-        /* Input area - clean design */
         .chat-input-area {
             padding: 20px;
             border-top: 1px solid var(--border-light);
@@ -398,7 +388,16 @@
             cursor: not-allowed;
         }
 
-        /* Mobile responsive */
+        .status-online {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -421,25 +420,9 @@
                 max-width: 85%;
             }
         }
-
-        /* Status indicator */
-        .status-online {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-        }
-
-        .coach-avatar {
-            position: relative;
-        }
     </style>
 </head>
 <body>
-    <!-- Clean header -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
@@ -452,25 +435,21 @@
         </div>
     </header>
 
-    <!-- Main content -->
     <div class="container">
-        <!-- Hero section matching your website -->
         <div class="hero-section">
             <h1 class="hero-title">Ready To Master High-Ticket Sales With Ray-I?</h1>
             <p class="hero-subtitle">Get personalized coaching from your AI sales expert. Ask questions, get strategies, and accelerate your DSA journey.</p>
             
-            <!-- Quick actions matching your website buttons -->
             <div class="quick-actions">
-                <button class="quick-btn primary" onclick="chatApp.sendQuickMessage('Help me close my first high-ticket sale')">
+                <button class="quick-btn primary" onclick="sendQuickMessage('Help me close my first high-ticket sale')">
                     ⚡ Get Closing Help
                 </button>
-                <button class="quick-btn secondary" onclick="chatApp.sendQuickMessage('What should I focus on in the DSA course today?')">
+                <button class="quick-btn secondary" onclick="sendQuickMessage('What should I focus on in the DSA course today?')">
                     📚 Course Guidance
                 </button>
             </div>
         </div>
 
-        <!-- Chat interface -->
         <div class="chat-container">
             <div class="chat-header">
                 <div class="coach-avatar">
@@ -487,7 +466,7 @@
                 <div class="message assistant">
                     <div class="message-avatar">⚡</div>
                     <div class="message-bubble">
-                        Hey! I'm Ray-I, your premium DSA sales coach. Ready to crush some high-ticket sales goals today? What challenge can I help you solve? ⚡
+                        <p>Hey! I'm Ray-I, your premium DSA sales coach. Ready to crush some high-ticket sales goals today? What challenge can I help you solve? ⚡</p>
                     </div>
                 </div>
             </div>
@@ -512,7 +491,7 @@
                         placeholder="Ask Ray-I about sales strategies, course content, objection handling..."
                         rows="1"
                     ></textarea>
-                    <button class="send-button" id="sendButton" onclick="chatApp.sendMessage()">
+                    <button class="send-button" id="sendButton" onclick="sendMessage()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                         </svg>
@@ -523,215 +502,177 @@
     </div>
 
     <script>
-        class DSAChatApp {
-            constructor() {
-                this.backendUrl = 'https://dsa-chat-backend.vercel.app/chat';
-                this.conversationHistory = [];
-                this.isLoading = false;
-                
-                this.chatInput = document.getElementById('chatInput');
-                this.chatMessages = document.getElementById('chatMessages');
-                this.sendButton = document.getElementById('sendButton');
-                this.typingIndicator = document.getElementById('typingIndicator');
-                
-                this.initializeEventListeners();
-                
-                console.log('🚀 DSA Chat App initialized with backend:', this.backendUrl);
+        const backendUrl = 'https://dsa-chat-backend.vercel.app/chat';
+        let conversationHistory = [];
+        let isLoading = false;
+
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Initialize event listeners
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
+        });
+
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+        });
+
+        function formatMessage(content) {
+            // Simple and reliable formatting
+            let formatted = content;
             
-            initializeEventListeners() {
-                // Enter key to send
-                this.chatInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        this.sendMessage();
-                    }
-                });
+            // Handle numbered lists
+            if (formatted.includes('1.') || formatted.includes('2.') || formatted.includes('3.')) {
+                const lines = formatted.split('\\n');
+                let result = '';
+                let inList = false;
                 
-                // Auto-resize textarea
-                this.chatInput.addEventListener('input', () => {
-                    this.chatInput.style.height = 'auto';
-                    this.chatInput.style.height = Math.min(this.chatInput.scrollHeight, 120) + 'px';
-                });
-            }
-            
-            async sendMessage() {
-                const message = this.chatInput.value.trim();
-                if (!message || this.isLoading) return;
-                
-                this.addMessage('user', message);
-                this.chatInput.value = '';
-                this.chatInput.style.height = 'auto';
-                this.setLoading(true);
-                
-                try {
-                    console.log('🎯 Sending message to backend:', message);
+                for (let line of lines) {
+                    line = line.trim();
                     
-                    const response = await fetch(this.backendUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            message: message,
-                            conversationHistory: this.conversationHistory
-                        })
-                    });
-                    
-                    console.log('📡 Response status:', response.status);
-                    
-                    if (!response.ok) {
-                        const errorData = await response.text();
-                        console.error('❌ Backend error:', errorData);
-                        throw new Error(`Backend error: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    console.log('✅ Received response:', data);
-                    
-                    // Add to conversation history
-                    this.conversationHistory.push(
-                        { role: 'user', content: message },
-                        { role: 'assistant', content: data.reply }
-                    );
-                    
-                    // Keep conversation history manageable
-                    if (this.conversationHistory.length > 10) {
-                        this.conversationHistory = this.conversationHistory.slice(-10);
-                    }
-                    
-                    // Show typing effect
-                    this.showTypingIndicator();
-                    
-                    setTimeout(() => {
-                        this.hideTypingIndicator();
-                        this.addMessage('assistant', data.reply);
-                    }, 1000);
-                    
-                } catch (error) {
-                    console.error('💥 Chat error:', error);
-                    this.hideTypingIndicator();
-                    
-                    let errorMsg = `⚠️ I'm having trouble connecting right now. `;
-                    
-                    if (error.message.includes('Backend error')) {
-                        errorMsg += `The DSA coaching system seems to be updating. Please try again in a moment.`;
-                    } else {
-                        errorMsg += `Please check your connection and try again.`;
-                    }
-                    
-                    this.addMessage('assistant', errorMsg, true);
-                }
-                
-                this.setLoading(false);
-                this.chatInput.focus();
-            }
-            
-            sendQuickMessage(message) {
-                this.chatInput.value = message;
-                this.sendMessage();
-            }
-            
-            addMessage(type, content, isError = false) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${type}`;
-                
-                const formattedContent = this.formatMessage(content);
-                
-                messageDiv.innerHTML = `
-                    <div class="message-avatar">${type === 'user' ? 'You' : '⚡'}</div>
-                    <div class="message-bubble ${isError ? 'error' : ''}">${formattedContent}</div>
-                `;
-                
-                this.chatMessages.appendChild(messageDiv);
-                this.scrollToBottom();
-            }
-            
-            formatMessage(content) {
-                try {
-                    // Simple and safe formatting
-                    let formatted = content;
-                    
-                    // Convert newlines to breaks
-                    formatted = formatted.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br>');
-                    
-                    // Handle numbered lists (1., 2., 3.)
-                    if (formatted.includes('1.') || formatted.includes('2.') || formatted.includes('3.')) {
-                        const lines = formatted.split('<br>');
-                        let result = '';
-                        let inList = false;
-                        
-                        for (let line of lines) {
-                            line = line.trim();
-                            
-                            // Check for numbered items
-                            if (/^\\d+\\.\\s/.test(line)) {
-                                if (!inList) {
-                                    result += '<ul>';
-                                    inList = true;
-                                }
-                                const cleanLine = line.replace(/^\\d+\\.\\s+/, '');
-                                result += '<li>' + cleanLine + '</li>';
-                            } else {
-                                if (inList) {
-                                    result += '</ul>';
-                                    inList = false;
-                                }
-                                if (line) {
-                                    result += '<p>' + line + '</p>';
-                                }
-                            }
+                    if (/^\\d+\\.\\s/.test(line)) {
+                        if (!inList) {
+                            result += '<ul>';
+                            inList = true;
                         }
-                        
+                        const cleanLine = line.replace(/^\\d+\\.\\s+/, '');
+                        result += '<li>' + cleanLine + '</li>';
+                    } else {
                         if (inList) {
                             result += '</ul>';
+                            inList = false;
                         }
-                        
-                        formatted = result;
-                    } else {
-                        // Regular paragraph
-                        if (!formatted.includes('<p>')) {
-                            formatted = '<p>' + formatted + '</p>';
+                        if (line) {
+                            result += '<p>' + line + '</p>';
                         }
                     }
-                    
-                    // Basic text formatting
-                    formatted = formatted
-                        .replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>')
-                        .replace(/⚡/g, '<span style="color: #f59e0b;">⚡</span>')
-                        .replace(/<p><\\/p>/g, '');
-                    
-                    return formatted;
-                } catch (error) {
-                    // Fallback - just return original content with basic formatting
-                    return content.replace(/\\n/g, '<br>').replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>');
+                }
+                
+                if (inList) {
+                    result += '</ul>';
+                }
+                
+                formatted = result;
+            } else {
+                formatted = formatted.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br>');
+                if (!formatted.includes('<p>')) {
+                    formatted = '<p>' + formatted + '</p>';
                 }
             }
             
-            setLoading(loading) {
-                this.isLoading = loading;
-                this.sendButton.disabled = loading;
-                this.chatInput.disabled = loading;
-            }
+            // Basic text formatting
+            formatted = formatted
+                .replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>')
+                .replace(/⚡/g, '<span style="color: #f59e0b;">⚡</span>')
+                .replace(/<p><\\/p>/g, '');
             
-            showTypingIndicator() {
-                this.typingIndicator.style.display = 'flex';
-                this.scrollToBottom();
-            }
-            
-            hideTypingIndicator() {
-                this.typingIndicator.style.display = 'none';
-            }
-            
-            scrollToBottom() {
-                setTimeout(() => {
-                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-                }, 100);
-            }
+            return formatted;
         }
-        
-        // Initialize app
-        const chatApp = new DSAChatApp();
+
+        function addMessage(type, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const formattedContent = formatMessage(content);
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${type === 'user' ? 'You' : '⚡'}</div>
+                <div class="message-bubble">${formattedContent}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function setLoading(loading) {
+            isLoading = loading;
+            sendButton.disabled = loading;
+            chatInput.disabled = loading;
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'flex';
+            scrollToBottom();
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message || isLoading) return;
+            
+            addMessage('user', message);
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            setLoading(true);
+            
+            try {
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversationHistory: conversationHistory
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Backend error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                conversationHistory.push(
+                    { role: 'user', content: message },
+                    { role: 'assistant', content: data.reply }
+                );
+                
+                if (conversationHistory.length > 10) {
+                    conversationHistory = conversationHistory.slice(-10);
+                }
+                
+                showTypingIndicator();
+                
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    addMessage('assistant', data.reply);
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Chat error:', error);
+                hideTypingIndicator();
+                
+                let errorMsg = `⚠️ I'm having trouble connecting right now. Please try again in a moment.`;
+                addMessage('assistant', errorMsg);
+            }
+            
+            setLoading(false);
+            chatInput.focus();
+        }
+
+        function sendQuickMessage(message) {
+            chatInput.value = message;
+            sendMessage();
+        }
+
+        console.log('🚀 DSA Chat initialized and ready!');
     </script>
 </body>
 </html>
