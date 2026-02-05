@@ -251,14 +251,16 @@
 
         .message-bubble {
             max-width: 75%;
-            padding: 16px 20px;
+            padding: 20px 24px;
             border-radius: 12px;
-            font-size: 15px;
-            line-height: 1.6;
+            font-size: 16px;
+            line-height: 1.7;
         }
 
         .message-bubble p {
-            margin: 0 0 12px 0;
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            line-height: 1.7;
         }
 
         .message-bubble p:last-child {
@@ -266,13 +268,26 @@
         }
 
         .message-bubble ul {
-            margin: 12px 0;
-            padding-left: 20px;
+            margin: 16px 0;
+            padding-left: 0;
+            list-style: none;
         }
 
         .message-bubble li {
-            margin: 8px 0;
-            line-height: 1.5;
+            margin: 12px 0;
+            padding-left: 24px;
+            position: relative;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .message-bubble li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent-dark);
+            font-weight: bold;
+            font-size: 18px;
         }
 
         .message-bubble strong {
@@ -633,37 +648,50 @@
             }
             
             formatMessage(content) {
-                // Simple, reliable formatting for Ray-I responses
                 let formatted = content;
                 
-                // Convert bullet points to proper HTML list
-                if (formatted.includes('•')) {
-                    // Split on bullet points and create list
-                    const parts = formatted.split('•').filter(part => part.trim());
+                // Split into lines and process each one
+                const lines = formatted.split('\\n').filter(line => line.trim());
+                let result = [];
+                let currentList = [];
+                let inList = false;
+                
+                for (let line of lines) {
+                    line = line.trim();
                     
-                    if (parts.length > 1) {
-                        const intro = parts[0].trim();
-                        const bullets = parts.slice(1).map(item => 
-                            `<li>${item.trim().replace(/^\\s+|\\s+$/g, '')}</li>`
-                        ).join('');
+                    // Check if this is a bullet point
+                    if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
+                        // Remove bullet symbol and add to list
+                        const cleanLine = line.replace(/^[•\\-\\*]\\s+/, '');
+                        currentList.push(`<li>${cleanLine}</li>`);
+                        inList = true;
+                    } else {
+                        // If we were building a list, close it
+                        if (inList && currentList.length > 0) {
+                            result.push(`<ul>${currentList.join('')}</ul>`);
+                            currentList = [];
+                            inList = false;
+                        }
                         
-                        formatted = `<p>${intro}</p><ul>${bullets}</ul>`;
+                        // Add regular line as paragraph
+                        if (line) {
+                            result.push(`<p>${line}</p>`);
+                        }
                     }
-                } else {
-                    // Regular paragraph formatting
-                    formatted = formatted
-                        .replace(/\\n\\n/g, '</p><p>')
-                        .replace(/\\n/g, '<br>')
-                        .replace(/^/, '<p>')
-                        .replace(/$/, '</p>');
                 }
+                
+                // Close any remaining list
+                if (inList && currentList.length > 0) {
+                    result.push(`<ul>${currentList.join('')}</ul>`);
+                }
+                
+                formatted = result.join('');
                 
                 // Basic text formatting
                 formatted = formatted
                     .replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>')
                     .replace(/\\*([^\\*]+)\\*/g, '<em>$1</em>')
-                    .replace(/`([^`]+)`/g, '<code>$1</code>')
-                    .replace(/<p><\\/p>/g, '');
+                    .replace(/⚡/g, '<span style="color: #f59e0b;">⚡</span>');
                 
                 return formatted;
             }
