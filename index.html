@@ -245,8 +245,8 @@
         }
 
         .message.user .message-avatar {
-            background: var(--accent-light);
-            color: var(--text-primary);
+            background: var(--accent-dark);
+            color: white;
         }
 
         .message-bubble {
@@ -648,51 +648,73 @@
             }
             
             formatMessage(content) {
-                let formatted = content;
+                console.log('Original content:', JSON.stringify(content));
                 
-                // Split into lines and process each one
-                const lines = formatted.split('\\n').filter(line => line.trim());
-                let result = [];
-                let currentList = [];
-                let inList = false;
+                // Direct approach - convert \\n to <br> first
+                let formatted = content
+                    .replace(/\\n\\n/g, '</p><p>')
+                    .replace(/\\n/g, '<br>');
                 
-                for (let line of lines) {
-                    line = line.trim();
+                console.log('After line breaks:', formatted);
+                
+                // Handle bullet points - look for bullet + space pattern
+                if (formatted.includes('•') || formatted.includes('- ')) {
+                    // Split by <br> and process each line
+                    const lines = formatted.split('<br>');
+                    let result = '';
+                    let inList = false;
                     
-                    // Check if this is a bullet point
-                    if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
-                        // Remove bullet symbol and add to list
-                        const cleanLine = line.replace(/^[•\\-\\*]\\s+/, '');
-                        currentList.push(`<li>${cleanLine}</li>`);
-                        inList = true;
-                    } else {
-                        // If we were building a list, close it
-                        if (inList && currentList.length > 0) {
-                            result.push(`<ul>${currentList.join('')}</ul>`);
-                            currentList = [];
-                            inList = false;
-                        }
+                    for (let line of lines) {
+                        line = line.trim();
                         
-                        // Add regular line as paragraph
-                        if (line) {
-                            result.push(`<p>${line}</p>`);
+                        if (line.match(/^[•\\-]\\s/)) {
+                            // Start list if not already in one
+                            if (!inList) {
+                                result += '<ul>';
+                                inList = true;
+                            }
+                            
+                            // Clean the bullet and wrap in <li>
+                            const cleanLine = line.replace(/^[•\\-]\\s+/, '');
+                            result += `<li>${cleanLine}</li>`;
+                        } else {
+                            // Close list if we were in one
+                            if (inList) {
+                                result += '</ul>';
+                                inList = false;
+                            }
+                            
+                            // Add as paragraph if not empty
+                            if (line && !line.includes('</p>')) {
+                                result += `<p>${line}</p>`;
+                            } else if (line) {
+                                result += line;
+                            }
                         }
+                    }
+                    
+                    // Close final list if needed
+                    if (inList) {
+                        result += '</ul>';
+                    }
+                    
+                    formatted = result;
+                } else {
+                    // No bullets - just wrap in paragraphs
+                    if (!formatted.includes('<p>')) {
+                        formatted = `<p>${formatted}</p>`;
                     }
                 }
                 
-                // Close any remaining list
-                if (inList && currentList.length > 0) {
-                    result.push(`<ul>${currentList.join('')}</ul>`);
-                }
-                
-                formatted = result.join('');
-                
-                // Basic text formatting
+                // Clean up and format text
                 formatted = formatted
                     .replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>')
-                    .replace(/\\*([^\\*]+)\\*/g, '<em>$1</em>')
-                    .replace(/⚡/g, '<span style="color: #f59e0b;">⚡</span>');
+                    .replace(/⚡/g, '<span style="color: #f59e0b; font-weight: bold;">⚡</span>')
+                    .replace(/<p><\\/p>/g, '')
+                    .replace(/<br><\\/p>/g, '</p>')
+                    .replace(/<p><br>/g, '<p>');
                 
+                console.log('Final formatted:', formatted);
                 return formatted;
             }
             
